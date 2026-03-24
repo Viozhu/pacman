@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Users/jorgeignaciogaray/Workspace/Projects/test-claude/.env*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm:*)",
+      "Bash(CLAUDE_PLUGIN_ROOT=\"/Users/jorgeignaciogaray/.claude/plugins/cache/claude-code-plugins/hookify/0.1.0\" python3 -c \"\nimport os, sys\nPLUGIN_ROOT = '/Users/jorgeignaciogaray/.claude/plugins/cache/claude-code-plugins/hookify/0.1.0'\nparent_dir = os.path.dirname\\(PLUGIN_ROOT\\)\nprint\\('parent_dir:', parent_dir\\)\nprint\\('exists:', os.path.isdir\\(parent_dir\\)\\)\nprint\\('contents:', os.listdir\\(parent_dir\\)\\)\nsys.path.insert\\(0, parent_dir\\)\nsys.path.insert\\(0, PLUGIN_ROOT\\)\nprint\\('sys.path[:4]:', sys.path[:4]\\)\ntry:\n    from hookify.core.config_loader import load_rules\n    print\\('Import succeeded!'\\)\nexcept ImportError as e:\n    print\\('Import failed:', e\\)\n\")",
+      "Read(//Users/jorgeignaciogaray/.claude/plugins/cache/claude-code-plugins/hookify/0.1.0/**)",
+      "Bash(brew list:*)",
+      "Bash(CLAUDE_PLUGIN_ROOT=\"/Users/jorgeignaciogaray/.claude/plugins/cache/claude-code-plugins/hookify/0.1.0\" python3 -c \"\nimport os, sys\nPLUGIN_ROOT = os.environ['CLAUDE_PLUGIN_ROOT']\nparent_dir = os.path.dirname\\(PLUGIN_ROOT\\)\nsys.path.insert\\(0, parent_dir\\)\nsys.path.insert\\(0, PLUGIN_ROOT\\)\n\nfrom hookify.core.config_loader import load_rules\nfrom hookify.core.rule_engine import RuleEngine\nprint\\('Imports OK'\\)\nrules = load_rules\\(\\)\nprint\\(f'Rules loaded: {len\\(rules\\)}'\\)\n\")",
+      "Bash(nvm alias:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
