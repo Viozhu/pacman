@@ -44,6 +44,7 @@ export class Game {
   private readonly movement: MovementSystem;
   private readonly collision: CollisionSystem;
   private readonly scoring: ScoringSystem;
+  private pathfinding: PathfindingSystem;
   private readonly preset: DifficultyPreset;
   private readonly callbacks: GameCallbacks;
   private readonly nextExitTime = new Map<GhostType, number>();
@@ -79,8 +80,8 @@ export class Game {
       [GhostType.CLYDE]:  { tile: this.currentConfig.ghostStarts.clyde,  inHouse: true  },
     };
 
-    const pathfinding = new PathfindingSystem(this.maze);
-    this.movement = new MovementSystem(this.maze, pathfinding, this.preset);
+    this.pathfinding = new PathfindingSystem(this.maze);
+    this.movement = new MovementSystem(this.maze, this.pathfinding, this.preset);
     this.collision = new CollisionSystem(this.maze);
     this.scoring = new ScoringSystem();
 
@@ -208,6 +209,9 @@ export class Game {
     // Load the new level config and rebuild the maze
     this.currentConfig = mazeLoader.getLevel(this.callbacks.getLevel());
     this.maze = new Maze(this.currentConfig);
+    this.pathfinding = new PathfindingSystem(this.maze);
+    this.movement.setMaze(this.maze, this.pathfinding);
+    this.collision.setMaze(this.maze);
 
     this.callbacks.setDotsRemaining(this.maze.getRemainingDots());
     this.applyDifficulty(this.callbacks.getLevel());

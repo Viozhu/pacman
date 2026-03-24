@@ -12,9 +12,13 @@ export interface CollisionResult {
 }
 
 export class CollisionSystem {
-  private readonly maze: Maze;
+  private maze: Maze;
 
   constructor(maze: Maze) {
+    this.maze = maze;
+  }
+
+  setMaze(maze: Maze): void {
     this.maze = maze;
   }
 
