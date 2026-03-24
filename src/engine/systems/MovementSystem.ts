@@ -5,6 +5,7 @@ import type { Maze } from '@/engine/maze/Maze';
 import type { PathfindingSystem } from '@/engine/systems/PathfindingSystem';
 import { GhostMode } from '@/types/entities.types';
 import type { Direction } from '@/types/entities.types';
+import type { DifficultyPreset } from '@/types/game.types';
 import { DIRECTION_VECTORS, OPPOSITE_DIRECTION } from '@/engine/utils/Direction';
 import { Vector2D } from '@/engine/utils/Vector2D';
 import { GHOST_HOUSE_ENTRY } from '@/engine/utils/Constants';
@@ -14,10 +15,12 @@ const DIRECTIONS: ReadonlyArray<Direction> = ['UP', 'LEFT', 'DOWN', 'RIGHT'];
 export class MovementSystem {
   private readonly maze: Maze;
   private readonly pathfinding: PathfindingSystem;
+  private readonly preset: DifficultyPreset;
 
-  constructor(maze: Maze, pathfinding: PathfindingSystem) {
+  constructor(maze: Maze, pathfinding: PathfindingSystem, preset: DifficultyPreset) {
     this.maze = maze;
     this.pathfinding = pathfinding;
+    this.preset = preset;
   }
 
   movePacman(pacman: Pacman, deltaTime: number): void {
@@ -97,28 +100,44 @@ export class MovementSystem {
   }
 
   private pickDirection(ghost: Ghost, target: Vector2D): Direction {
+    const currentTile = new Vector2D(ghost.getTileX(), ghost.getTileY());
+    const bfsDir = this.pathfinding.nextStep(currentTile, target);
+
+    // errorRate only applies in CHASE/SCATTER — FRIGHTENED already uses a
+    // random target tile so adding errorRate would double-randomize.
+    // DEAD must always take the optimal path home.
+    const applyError =
+      this.preset.errorRate > 0 &&
+      ghost.mode !== GhostMode.FRIGHTENED &&
+      ghost.mode !== GhostMode.DEAD;
+
+    if (applyError && Math.random() < this.preset.errorRate) {
+      const randomDir = this.randomValidDirection(ghost);
+      if (randomDir !== null) return randomDir;
+    }
+
+    // BFS returns 'NONE' when from===to or no path exists — fall back so
+    // the ghost doesn't freeze.
+    if (bfsDir === 'NONE') {
+      return this.randomValidDirection(ghost) ?? 'NONE';
+    }
+
+    return bfsDir;
+  }
+
+  private randomValidDirection(ghost: Ghost): Direction | null {
     const tx = ghost.getTileX();
     const ty = ghost.getTileY();
     const forbidden = OPPOSITE_DIRECTION[ghost.direction];
 
-    let best: Direction = 'NONE';
-    let bestDist = Infinity;
-
-    for (const dir of DIRECTIONS) {
-      if (dir === forbidden) continue;
+    const valid = DIRECTIONS.filter((dir) => {
+      if (dir === forbidden) return false;
       const vec = DIRECTION_VECTORS[dir];
-      const nx = tx + vec.x;
-      const ny = ty + vec.y;
-      if (!this.maze.isWalkable(nx, ny)) continue;
+      return this.maze.isWalkable(tx + vec.x, ty + vec.y);
+    });
 
-      const dist = Math.hypot(target.x - nx, target.y - ny);
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = dir;
-      }
-    }
-
-    return best;
+    if (valid.length === 0) return null;
+    return valid[Math.floor(Math.random() * valid.length)]!;
   }
 
   private randomAdjacentTile(ghost: Ghost): Vector2D {
