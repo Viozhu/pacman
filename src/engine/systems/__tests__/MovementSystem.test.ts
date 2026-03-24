@@ -7,6 +7,7 @@ import { Pacman } from '@/engine/entities/Pacman';
 import { GhostMode, GhostType } from '@/types/entities.types';
 import { Vector2D } from '@/engine/utils/Vector2D';
 import { TileType } from '@/types/maze.types';
+import { GAME_CONSTANTS } from '@/types/game.types';
 import type { LevelConfig } from '@/types/maze.types';
 import type { DifficultyPreset } from '@/types/game.types';
 
@@ -549,5 +550,89 @@ describe('MovementSystem — isInHouse guard', () => {
 
     expect(ghost.position.x).toBe(initialX);
     expect(ghost.position.y).toBe(initialY);
+  });
+});
+
+// ─── Tunnel traversal ─────────────────────────────────────────────────────────
+
+// Tunnel maze: 6 columns wide, tunnel row at y=1
+//   col:  0  1  2  3  4  5
+// row 0:  W  W  W  W  W  W
+// row 1:  T  D  D  D  D  T   ← tunnel row
+// row 2:  W  W  W  W  W  W
+const T = TileType.TUNNEL;
+
+function makeTunnelMaze(): Maze {
+  return makeMaze([
+    [W, W, W, W, W, W],
+    [T, D, D, D, D, T],
+    [W, W, W, W, W, W],
+  ]);
+}
+
+describe('MovementSystem — tunnel traversal (Pac-Man)', () => {
+  it('Pac-Man at left edge is NOT stopped when moving LEFT through a tunnel tile', () => {
+    // Without the isWalkable wrapping fix, isWalkable(-1, 1) returned false and
+    // stopped pacman. With the fix it checks the wrapped tile (col 5 = TUNNEL) = walkable.
+    const maze = makeTunnelMaze();
+    const pf = new PathfindingSystem(maze);
+    const system = new MovementSystem(maze, pf, makePreset());
+
+    const pacman = new Pacman(0, 1); // leftmost tunnel tile
+    pacman.direction = 'LEFT';
+    pacman.snapToTileCenter(); // ensure isAtTileCenter() returns true
+
+    system.movePacman(pacman, 1); // 1ms — minimal movement
+
+    // Direction must NOT have been reset to NONE by the wall-check
+    expect(pacman.direction).toBe('LEFT');
+  });
+
+  it('Pac-Man at right edge is NOT stopped when moving RIGHT through a tunnel tile', () => {
+    const maze = makeTunnelMaze();
+    const pf = new PathfindingSystem(maze);
+    const system = new MovementSystem(maze, pf, makePreset());
+
+    const pacman = new Pacman(5, 1); // rightmost tunnel tile
+    pacman.direction = 'RIGHT';
+    pacman.snapToTileCenter();
+
+    system.movePacman(pacman, 1);
+
+    expect(pacman.direction).toBe('RIGHT');
+  });
+
+  it('Pac-Man wraps from the left boundary to the right side of the maze', () => {
+    const maze = makeTunnelMaze();
+    const pf = new PathfindingSystem(maze);
+    const system = new MovementSystem(maze, pf, makePreset());
+
+    const ts = GAME_CONSTANTS.TILE_SIZE;
+    const pacman = new Pacman(0, 1);
+    pacman.direction = 'LEFT';
+    // Force position just past the left boundary so getTileX() = -1
+    pacman.position.x = -1;
+
+    system.movePacman(pacman, 0); // 0ms — only wrapTunnel fires
+
+    // Should have been teleported to tile 5 center (rightmost tunnel column)
+    expect(pacman.position.x).toBe(5 * ts + ts / 2);
+  });
+
+  it('Pac-Man wraps from the right boundary to the left side of the maze', () => {
+    const maze = makeTunnelMaze();
+    const pf = new PathfindingSystem(maze);
+    const system = new MovementSystem(maze, pf, makePreset());
+
+    const ts = GAME_CONSTANTS.TILE_SIZE;
+    const pacman = new Pacman(5, 1);
+    pacman.direction = 'RIGHT';
+    // Force position past the right boundary so getTileX() = 6 (= width)
+    pacman.position.x = 6 * ts;
+
+    system.movePacman(pacman, 0);
+
+    // Should have been teleported to tile 0 center (leftmost tunnel column)
+    expect(pacman.position.x).toBe(0 * ts + ts / 2);
   });
 });
