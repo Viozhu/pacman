@@ -28,14 +28,21 @@ export class PathfindingSystem {
 
     visited.add(key(from.x, from.y));
 
+    const { width } = this.maze.config;
+    const wrapX = (x: number): number => {
+      if (x < 0) return width - 1;
+      if (x >= width) return 0;
+      return x;
+    };
+
     for (const dir of DIRECTIONS) {
       const vec = DIRECTION_VECTORS[dir];
-      const nx = from.x + vec.x;
+      const wx = wrapX(from.x + vec.x);
       const ny = from.y + vec.y;
-      const k = key(nx, ny);
-      if (this.maze.isWalkable(nx, ny) && !visited.has(k)) {
+      const k = key(wx, ny);
+      if (this.maze.isWalkable(wx, ny) && !visited.has(k)) {
         visited.add(k);
-        queue.push({ x: nx, y: ny, firstDir: dir });
+        queue.push({ x: wx, y: ny, firstDir: dir });
       }
     }
 
@@ -45,12 +52,12 @@ export class PathfindingSystem {
 
       for (const dir of DIRECTIONS) {
         const vec = DIRECTION_VECTORS[dir];
-        const nx = node.x + vec.x;
+        const wx = wrapX(node.x + vec.x);
         const ny = node.y + vec.y;
-        const k = key(nx, ny);
-        if (this.maze.isWalkable(nx, ny) && !visited.has(k)) {
+        const k = key(wx, ny);
+        if (this.maze.isWalkable(wx, ny) && !visited.has(k)) {
           visited.add(k);
-          queue.push({ x: nx, y: ny, firstDir: node.firstDir });
+          queue.push({ x: wx, y: ny, firstDir: node.firstDir });
         }
       }
     }
