@@ -121,6 +121,36 @@ This project uses strict TypeScript settings:
 
 ---
 
+## Ghost AI
+
+Each ghost has a distinct personality implemented via a unique `getChaseTarget()` strategy:
+
+| Ghost | Personality | Chase target |
+|---|---|---|
+| Blinky (red) | Direct chaser | Pac-Man's exact tile |
+| Pinky (pink) | Ambusher | 4 tiles ahead of Pac-Man |
+| Inky (cyan) | Flanker | Pincer point using Blinky's position |
+| Clyde (orange) | Unpredictable | Chases if >8 tiles away, scatters if close |
+
+Pathfinding uses **BFS** — ghosts always take the shortest walkable path to their target tile. The `PathfindingSystem` computes the first step of the optimal route at each intersection.
+
+### Difficulty
+
+Three presets controlled from the Settings screen:
+
+| Parameter | Easy | Normal | Hard |
+|---|---|---|---|
+| Ghost base speed | 95 px/s | 120 px/s | 145 px/s |
+| Frightened duration | 12s | 8s | 4s |
+| Error rate | 20% | 0% | 0% |
+| Inky exit delay | 2.5s | 1.5s | 0s |
+| Clyde exit delay | 5s | 3s | 0s |
+| Elroy phase 1 dots | 15 | 20 | 30 |
+
+The **error rate** in Easy gives each ghost a 20% chance per intersection of taking a random valid direction instead of the BFS-optimal one, making them feel less threatening without reverting to worse AI.
+
+---
+
 ## Contributing
 
 1. Fork the repo and create a feature branch

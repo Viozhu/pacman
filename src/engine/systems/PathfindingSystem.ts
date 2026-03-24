@@ -6,9 +6,13 @@ import type { Direction } from '@/types/entities.types';
 const DIRECTIONS: ReadonlyArray<Direction> = ['UP', 'LEFT', 'DOWN', 'RIGHT'];
 
 export class PathfindingSystem {
-  private readonly maze: Maze;
+  private maze: Maze;
 
   constructor(maze: Maze) {
+    this.maze = maze;
+  }
+
+  setMaze(maze: Maze): void {
     this.maze = maze;
   }
 

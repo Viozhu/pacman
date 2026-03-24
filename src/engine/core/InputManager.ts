@@ -20,6 +20,8 @@ class InputManager {
   private bufferedDirection: Direction | null = null;
 
   private handleKeyDown = (e: KeyboardEvent): void => {
+    const active = document.activeElement;
+    if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) return;
     const dir = KEY_MAP[e.key];
     if (dir !== undefined) {
       e.preventDefault();

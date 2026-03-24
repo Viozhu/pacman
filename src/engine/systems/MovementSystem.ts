@@ -13,14 +13,19 @@ import { GHOST_HOUSE_ENTRY } from '@/engine/utils/Constants';
 const DIRECTIONS: ReadonlyArray<Direction> = ['UP', 'LEFT', 'DOWN', 'RIGHT'];
 
 export class MovementSystem {
-  private readonly maze: Maze;
-  private readonly pathfinding: PathfindingSystem;
+  private maze: Maze;
+  private pathfinding: PathfindingSystem;
   private readonly preset: DifficultyPreset;
 
   constructor(maze: Maze, pathfinding: PathfindingSystem, preset: DifficultyPreset) {
     this.maze = maze;
     this.pathfinding = pathfinding;
     this.preset = preset;
+  }
+
+  setMaze(maze: Maze, pathfinding: PathfindingSystem): void {
+    this.maze = maze;
+    this.pathfinding = pathfinding;
   }
 
   movePacman(pacman: Pacman, deltaTime: number): void {

@@ -38,7 +38,11 @@ export class Maze {
   }
 
   isWalkable(x: number, y: number): boolean {
-    const tile = this.getTile(x, y);
+    const { width } = this.config;
+    let wx = x;
+    if (x < 0) wx = width - 1;
+    else if (x >= width) wx = 0;
+    const tile = this.getTile(wx, y);
     return tile !== null && tile.walkable;
   }
 

@@ -13,33 +13,15 @@ import { ScoringSystem } from '@/engine/systems/ScoringSystem';
 import { renderer } from '@/engine/core/Renderer';
 import { inputManager } from '@/engine/core/InputManager';
 import { GhostMode, GhostType } from '@/types/entities.types';
-import type { GameStatus } from '@/types/game.types';
-import { GAME_CONSTANTS } from '@/types/game.types';
+import type { GameStatus, DifficultyPreset } from '@/types/game.types';
+import { GAME_CONSTANTS, DIFFICULTY_PRESETS } from '@/types/game.types';
 import type { LevelConfig } from '@/types/maze.types';
 import type { Vector2D } from '@/engine/utils/Vector2D';
 import { GHOST_HOUSE_ENTRY } from '@/engine/utils/Constants';
 
 const MAX_LEVELS = 5;
 
-// Scatter/chase phase durations (ms): scatter, chase, scatter, chase …
-// Scatter phases are short so ghosts switch to chasing quickly.
-const SCATTER_CHASE_SCHEDULE: readonly number[] = [
-  3000, 20000, 3000, 20000, 1000, Infinity,
-];
-
-// Initial house exit delays (ms after game/level start)
-const GHOST_INITIAL_EXIT: Record<GhostType, number> = {
-  [GhostType.BLINKY]: 0,
-  [GhostType.PINKY]: 0,
-  [GhostType.INKY]: 5000,
-  [GhostType.CLYDE]: 10000,
-};
-
 const GHOST_REVIVE_DELAY = 3000;
-
-// Cruise Elroy thresholds (remaining dots → phase)
-const ELROY_PHASE2_DOTS = 10;
-const ELROY_PHASE1_DOTS = 20;
 
 export interface GameCallbacks {
   addScore: (points: number) => void;
@@ -62,6 +44,8 @@ export class Game {
   private readonly movement: MovementSystem;
   private readonly collision: CollisionSystem;
   private readonly scoring: ScoringSystem;
+  private pathfinding: PathfindingSystem;
+  private readonly preset: DifficultyPreset;
   private readonly callbacks: GameCallbacks;
   private readonly nextExitTime = new Map<GhostType, number>();
 
@@ -72,9 +56,10 @@ export class Game {
   private scatterChaseTimer = 0;
   private scatterChasePhase = 0;
   private isScatterPhase = true;
-  private frightenedDuration = 8000;
+  private frightenedDuration: number;
 
-  constructor(callbacks: GameCallbacks) {
+  constructor(callbacks: GameCallbacks, difficulty: 'easy' | 'normal' | 'hard' = 'normal') {
+    this.preset = DIFFICULTY_PRESETS[difficulty];
     this.callbacks = callbacks;
 
     this.currentConfig = mazeLoader.getLevel(callbacks.getLevel());
@@ -95,15 +80,16 @@ export class Game {
       [GhostType.CLYDE]:  { tile: this.currentConfig.ghostStarts.clyde,  inHouse: true  },
     };
 
-    const pathfinding = new PathfindingSystem(this.maze);
-    this.movement = new MovementSystem(this.maze, pathfinding);
+    this.pathfinding = new PathfindingSystem(this.maze);
+    this.movement = new MovementSystem(this.maze, this.pathfinding, this.preset);
     this.collision = new CollisionSystem(this.maze);
     this.scoring = new ScoringSystem();
 
     this.blinky.isInHouse = false;
+    this.frightenedDuration = this.preset.frightenedDuration;
 
     for (const ghost of this.ghosts) {
-      this.nextExitTime.set(ghost.ghostType, GHOST_INITIAL_EXIT[ghost.ghostType]);
+      this.nextExitTime.set(ghost.ghostType, this.preset.ghostExitDelays[ghost.ghostType]);
     }
 
     this.applyDifficulty(callbacks.getLevel());
@@ -212,7 +198,7 @@ export class Game {
       ghost.setMode(GhostMode.SCATTER);
       if (ghost === this.blinky) this.blinky.resetElroy();
       // Schedule exit relative to current game time
-      this.nextExitTime.set(ghost.ghostType, this.gameTime + GHOST_INITIAL_EXIT[ghost.ghostType]);
+      this.nextExitTime.set(ghost.ghostType, this.gameTime + this.preset.ghostExitDelays[ghost.ghostType]);
     }
   }
 
@@ -223,6 +209,9 @@ export class Game {
     // Load the new level config and rebuild the maze
     this.currentConfig = mazeLoader.getLevel(this.callbacks.getLevel());
     this.maze = new Maze(this.currentConfig);
+    this.pathfinding = new PathfindingSystem(this.maze);
+    this.movement.setMaze(this.maze, this.pathfinding);
+    this.collision.setMaze(this.maze);
 
     this.callbacks.setDotsRemaining(this.maze.getRemainingDots());
     this.applyDifficulty(this.callbacks.getLevel());
@@ -238,20 +227,19 @@ export class Game {
 
   private applyDifficulty(level: number): void {
     const safeLevel = Math.max(1, level);
-    // Ghost speed: 120 → 128 → 136 → 144 → 152 (max 160)
-    const ghostSpeed = Math.min(120 + (safeLevel - 1) * 8, 160);
-    // Frightened duration: 8000 → 7000 → 6000 → 5000 → 4000 (min 3000)
-    this.frightenedDuration = Math.max(3000, 8000 - (safeLevel - 1) * 1000);
+    const base = this.preset.ghostBaseSpeed;
+    const ghostSpeed = Math.min(base + (safeLevel - 1) * 8, base + 40);
     for (const ghost of this.ghosts) {
       ghost.setBaseSpeed(ghostSpeed);
     }
+    // frightenedDuration is fixed by preset — no per-level decay
   }
 
   private updateScatterChase(delta: number): void {
-    if (this.scatterChasePhase >= SCATTER_CHASE_SCHEDULE.length) return;
+    if (this.scatterChasePhase >= this.preset.scatterChaseSchedule.length) return;
 
     this.scatterChaseTimer += delta;
-    const phaseDuration = SCATTER_CHASE_SCHEDULE[this.scatterChasePhase] ?? Infinity;
+    const phaseDuration = this.preset.scatterChaseSchedule[this.scatterChasePhase] ?? Infinity;
 
     if (this.scatterChaseTimer >= phaseDuration) {
       this.scatterChaseTimer -= phaseDuration;
@@ -284,9 +272,9 @@ export class Game {
 
   private updateCruiseElroy(remaining: number): void {
     if (this.blinky.isInHouse || this.blinky.mode === GhostMode.DEAD) return;
-    if (remaining <= ELROY_PHASE2_DOTS) {
+    if (remaining <= this.preset.elroyPhase2Dots) {
       this.blinky.setElroyPhase(2);
-    } else if (remaining <= ELROY_PHASE1_DOTS) {
+    } else if (remaining <= this.preset.elroyPhase1Dots) {
       this.blinky.setElroyPhase(1);
     }
   }
