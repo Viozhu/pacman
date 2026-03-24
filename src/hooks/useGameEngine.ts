@@ -6,6 +6,7 @@ import { gameLoop } from '@/engine/core/GameLoop';
 import { inputManager } from '@/engine/core/InputManager';
 import { useGameStore } from '@/store/gameStore';
 import { useUiStore } from '@/store/uiStore';
+import { useSettingsStore } from '@/store/settingsStore';
 
 export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): void {
   const addScore = useGameStore((s) => s.addScore);
@@ -40,7 +41,8 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): v
       getLevel: () => useGameStore.getState().level,
     };
 
-    const game = new Game(callbacks);
+    const difficulty = useSettingsStore.getState().difficulty;
+    const game = new Game(callbacks, difficulty);
 
     gameLoop.start(
       (delta: number) => {
