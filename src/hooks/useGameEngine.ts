@@ -65,10 +65,10 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): v
       () => game.render(ctx),
     );
 
-    // Delay siren until intro melody finishes (~3.9 s)
+    // Delay siren until intro melody finishes (~3.3 s)
     const sirenTimer = setTimeout(() => {
       soundManager.startSiren();
-    }, 3900);
+    }, 3300);
 
     return () => {
       clearTimeout(sirenTimer);

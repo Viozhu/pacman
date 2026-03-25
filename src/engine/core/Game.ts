@@ -168,6 +168,7 @@ export class Game {
       soundManager.play('levelComplete');
       this.callbacks.nextLevel();
       this.advanceLevel();
+      return;
     }
 
     soundManager.updateSirenSpeed(remaining, this.totalDots);
