@@ -18,6 +18,7 @@ class SoundManager {
   private visibilityHandler: (() => void) | null = null;
 
   init(): void {
+    this.lastPreviewTime = 0;
     this.stopSiren();
     if (this.ctx) {
       this.ctx.close().catch(() => undefined);
@@ -61,7 +62,7 @@ class SoundManager {
 
   playPreview(): void {
     if (!this.ctx || !this.masterGain) return;
-    const now = Date.now();
+    const now = performance.now();
     if (now - this.lastPreviewTime < 150) return;
     this.lastPreviewTime = now;
 
@@ -80,6 +81,10 @@ class SoundManager {
 
     osc.start(t);
     osc.stop(t + 0.08);
+    osc.addEventListener('ended', () => {
+      osc.disconnect();
+      gain.disconnect();
+    });
   }
 
   startSiren(): void {
