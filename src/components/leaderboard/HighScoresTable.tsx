@@ -8,14 +8,14 @@ import type { HighScore } from '@/types/game.types';
 
 const columnHelper = createColumnHelper<HighScore>();
 
-const RANK_COLORS = ['text-yellow-400', 'text-gray-300', 'text-orange-400'] as const;
+const RANK_COLORS = ['text-[#ffd700]', 'text-[#c0c0c0]', 'text-[#cd7f32]'] as const;
 
 const columns = [
   columnHelper.display({
     id: 'rank',
     header: '#',
     cell: ({ row }) => (
-      <span className={RANK_COLORS[row.index] ?? 'text-gray-600'}>
+      <span className={RANK_COLORS[row.index] ?? 'text-[#333]'}>
         {row.index + 1}
       </span>
     ),
@@ -29,19 +29,19 @@ const columns = [
   columnHelper.accessor('score', {
     header: 'SCORE',
     cell: (info) => (
-      <span className="text-yellow-400 tabular-nums">
+      <span className="text-[#ffd700] tabular-nums">
         {String(info.getValue()).padStart(6, '0')}
       </span>
     ),
   }),
   columnHelper.accessor('level', {
     header: 'LV',
-    cell: (info) => <span className="text-gray-400">{info.getValue()}</span>,
+    cell: (info) => <span className="text-[#555]">{info.getValue()}</span>,
   }),
   columnHelper.accessor('timestamp', {
     header: 'DATE',
     cell: (info) => (
-      <span className="text-gray-600 text-xs">
+      <span className="text-[#222] text-[9px]">
         {new Date(info.getValue()).toLocaleDateString()}
       </span>
     ),
@@ -60,14 +60,14 @@ export function HighScoresTable({ scores }: Props) {
   });
 
   return (
-    <table className="w-full text-sm font-mono">
+    <table className="w-full text-[10px]">
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id} className="border-b border-gray-800">
+          <tr key={headerGroup.id} className="border-b border-[#1a1a1a]">
             {headerGroup.headers.map((header) => (
               <th
                 key={header.id}
-                className="py-2 px-1 text-left text-xs text-gray-600 tracking-widest font-bold"
+                className="py-2 px-1 text-left text-[#ff0000] tracking-widest font-bold"
               >
                 {flexRender(header.column.columnDef.header, header.getContext())}
               </th>
@@ -77,7 +77,7 @@ export function HighScoresTable({ scores }: Props) {
       </thead>
       <tbody>
         {table.getRowModel().rows.map((row) => (
-          <tr key={row.id} className="border-b border-gray-900 hover:bg-gray-900/50 transition-colors">
+          <tr key={row.id} className="border-b border-[#111] hover:bg-[#0a0a0a] transition-colors">
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id} className="py-2 px-1">
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
