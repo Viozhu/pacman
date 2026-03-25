@@ -82,7 +82,10 @@ export default function SettingsPage() {
             className="w-full accent-[#ffd700] cursor-pointer"
             aria-label="Volume"
           />
-          <p className="text-[9px] text-[#333] mt-1 tracking-wider">
+          <p
+            className="text-[9px] text-[#333] mt-1 tracking-wider cursor-pointer"
+            onClick={() => soundManager.playPreview()}
+          >
             {volume === 0 ? 'MUTED' : `${Math.round(volume * 100)}%`}
           </p>
         </section>
