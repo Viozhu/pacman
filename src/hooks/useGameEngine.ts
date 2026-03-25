@@ -4,6 +4,7 @@ import { Game, type GameCallbacks } from '@/engine/core/Game';
 import { renderer } from '@/engine/core/Renderer';
 import { gameLoop } from '@/engine/core/GameLoop';
 import { inputManager } from '@/engine/core/InputManager';
+import { soundManager } from '@/engine/core/SoundManager';
 import { useGameStore } from '@/store/gameStore';
 import { useUiStore } from '@/store/uiStore';
 import { useSettingsStore } from '@/store/settingsStore';
@@ -17,6 +18,12 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): v
   const nextLevel = useGameStore((s) => s.nextLevel);
   const reset = useGameStore((s) => s.reset);
   const isPaused = useUiStore((s) => s.isPaused);
+  const volume = useSettingsStore((s) => s.volume);
+
+  // Sync volume to SoundManager whenever it changes
+  useEffect(() => {
+    soundManager.setVolume(volume);
+  }, [volume]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,6 +35,8 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): v
     reset();
     renderer.init(canvas);
     inputManager.init();
+    soundManager.init();
+    soundManager.play('intro');
 
     const callbacks: GameCallbacks = {
       addScore,
@@ -50,14 +59,18 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): v
         const { status } = useGameStore.getState();
         if (status.type === 'game-over' || status.type === 'victory') {
           gameLoop.stop();
+          soundManager.stopSiren();
         }
       },
       () => game.render(ctx),
     );
 
+    soundManager.startSiren();
+
     return () => {
       gameLoop.stop();
       inputManager.destroy();
+      soundManager.stopSiren();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasRef]);
