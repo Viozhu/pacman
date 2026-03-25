@@ -17,6 +17,7 @@ class SoundManager {
   private visibilityHandler: (() => void) | null = null;
 
   init(): void {
+    this.stopSiren();
     if (this.ctx) {
       this.ctx.close().catch(() => undefined);
       if (this.visibilityHandler) {
