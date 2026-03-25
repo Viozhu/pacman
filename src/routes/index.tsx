@@ -1,6 +1,35 @@
 import { Link } from '@tanstack/react-router';
 
-const DOTS = ['·', '·', '·', '·', '·'] as const;
+function GhostSVG({ color }: { color: string }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M0,10 A10,10 0 0,1 20,10 L20,19 Q16.67,15 13.33,19 Q10,15 6.67,19 Q3.33,15 0,19 Z"
+        fill={color}
+      />
+      <ellipse cx="6.5" cy="8.5" rx="2.5" ry="3" fill="white" />
+      <ellipse cx="7.5" cy="9.2" rx="1.2" ry="1.8" fill="#1a1aff" />
+      <ellipse cx="13.5" cy="8.5" rx="2.5" ry="3" fill="white" />
+      <ellipse cx="14.5" cy="9.2" rx="1.2" ry="1.8" fill="#1a1aff" />
+    </svg>
+  );
+}
+
+function DotSVG() {
+  return (
+    <svg width="5" height="5" viewBox="0 0 5 5" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="2.5" cy="2.5" r="2" fill="#b8860b" />
+    </svg>
+  );
+}
+
+function PowerPelletSVG() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="7" cy="7" r="7" fill="#ffd700" />
+    </svg>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -29,14 +58,14 @@ export default function HomePage() {
       </h1>
 
       {/* Pac-Man row */}
-      <div className="flex items-center justify-center gap-1 text-base mb-6">
-        <span className="text-[#ff0000]">👻</span>
-        {DOTS.map((d, i) => <span key={i} className="text-[#ffd700] text-[10px]">{d}</span>)}
-        <span className="text-[#ffd700] text-2xl">●</span>
-        {DOTS.map((d, i) => <span key={i + 5} className="text-[#ffd700] text-[10px]">{d}</span>)}
-        <span className="text-[#ffb8ff]">👻</span>
-        <span className="text-[#00ffff]">👻</span>
-        <span className="text-[#ffb852]">👻</span>
+      <div className="flex items-center justify-center gap-1.5 mb-6">
+        <GhostSVG color="#ff0000" />
+        {Array.from({ length: 5 }).map((_, i) => <DotSVG key={i} />)}
+        <PowerPelletSVG />
+        {Array.from({ length: 5 }).map((_, i) => <DotSVG key={i + 5} />)}
+        <GhostSVG color="#ffb8ff" />
+        <GhostSVG color="#00ffff" />
+        <GhostSVG color="#ffb852" />
       </div>
 
       {/* Insert coin */}
