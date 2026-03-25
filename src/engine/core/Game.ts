@@ -18,6 +18,7 @@ import { GAME_CONSTANTS, DIFFICULTY_PRESETS } from '@/types/game.types';
 import type { LevelConfig } from '@/types/maze.types';
 import type { Vector2D } from '@/engine/utils/Vector2D';
 import { GHOST_HOUSE_ENTRY } from '@/engine/utils/Constants';
+import { soundManager } from '@/engine/core/SoundManager';
 
 const MAX_LEVELS = 5;
 
@@ -53,6 +54,7 @@ export class Game {
   private readonly ghostSpawnInfo: Record<GhostType, { tile: Vector2D; inHouse: boolean }>;
 
   private gameTime = 0;
+  private totalDots = 0;
   private scatterChaseTimer = 0;
   private scatterChasePhase = 0;
   private isScatterPhase = true;
@@ -94,6 +96,7 @@ export class Game {
 
     this.applyDifficulty(callbacks.getLevel());
     callbacks.setDotsRemaining(this.maze.getRemainingDots());
+    this.totalDots = this.maze.getRemainingDots();
     callbacks.setStatus({ type: 'playing', startTime: Date.now() });
   }
 
@@ -122,6 +125,7 @@ export class Game {
 
     if (result.ateDot) {
       this.callbacks.addScore(this.scoring.dotScore());
+      soundManager.play('chomp');
     }
 
     if (result.atePellet) {
@@ -133,17 +137,22 @@ export class Game {
           ghost.setMode(GhostMode.FRIGHTENED, this.frightenedDuration);
         }
       }
+      soundManager.play('pellet');
     }
 
     if (result.ateGhost !== null) {
       result.ateGhost.setMode(GhostMode.DEAD);
       this.callbacks.addScore(this.scoring.ghostScore());
+      soundManager.play('eatGhost');
     }
 
     if (result.hitGhost) {
       this.callbacks.loseLife();
-      if (this.callbacks.getStatus().type === 'game-over') return;
-      // Lives remain — reset entity positions for next attempt
+      if (this.callbacks.getStatus().type === 'game-over') {
+        soundManager.play('gameOver');
+        return;
+      }
+      soundManager.play('death');
       this.resetEntities();
     }
 
@@ -152,12 +161,17 @@ export class Game {
     this.updateCruiseElroy(remaining);
     if (remaining === 0) {
       if (this.callbacks.getLevel() >= MAX_LEVELS) {
+        soundManager.play('victory');
         this.callbacks.setStatus({ type: 'victory', finalScore: this.callbacks.getScore() });
-      } else {
-        this.callbacks.nextLevel();
-        this.advanceLevel();
+        return;
       }
+      soundManager.play('levelComplete');
+      this.callbacks.nextLevel();
+      this.advanceLevel();
+      return;
     }
+
+    soundManager.updateSirenSpeed(remaining, this.totalDots);
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -209,6 +223,7 @@ export class Game {
     // Load the new level config and rebuild the maze
     this.currentConfig = mazeLoader.getLevel(this.callbacks.getLevel());
     this.maze = new Maze(this.currentConfig);
+    this.totalDots = this.maze.getRemainingDots();
     this.pathfinding = new PathfindingSystem(this.maze);
     this.movement.setMaze(this.maze, this.pathfinding);
     this.collision.setMaze(this.maze);

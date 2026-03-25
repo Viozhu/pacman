@@ -1,10 +1,17 @@
+import { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useSettingsStore } from '@/store/settingsStore';
+import { soundManager } from '@/engine/core/SoundManager';
 
 const DIFFICULTIES = ['easy', 'normal', 'hard'] as const;
 
 export default function SettingsPage() {
-  const { soundEnabled, difficulty, toggleSound, setDifficulty } = useSettingsStore();
+  const { volume, difficulty, setVolume, mute, unmute, setDifficulty } = useSettingsStore();
+
+  useEffect(() => {
+    soundManager.init();
+    soundManager.setVolume(useSettingsStore.getState().volume);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-8">
@@ -22,27 +29,70 @@ export default function SettingsPage() {
           </h1>
         </div>
 
-        {/* Sound toggle */}
+        {/* Sound */}
         <section className="mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-white text-[11px] tracking-wider">SOUND</span>
             <button
-              onClick={toggleSound}
-              aria-label={soundEnabled ? 'Disable sound' : 'Enable sound'}
-              className="relative w-12 h-6 transition-colors focus-visible:outline-none"
-              style={{
-                backgroundColor: soundEnabled ? '#ffd700' : '#1a1a1a',
-                boxShadow: soundEnabled ? '0 0 8px rgba(255,215,0,0.4)' : 'none',
+              onClick={() => {
+                if (volume > 0) {
+                  mute();
+                  soundManager.setVolume(0);
+                } else {
+                  unmute();
+                  // unmute() has already updated volume in the store — read it back
+                  soundManager.setVolume(useSettingsStore.getState().volume);
+                }
               }}
+              aria-label={volume > 0 ? 'Mute sound' : 'Unmute sound'}
+              className="text-[#555] hover:text-white transition-colors text-[14px] leading-none"
             >
-              <span
-                className="absolute top-0.5 w-5 h-5 bg-black transition-all"
-                style={{ left: soundEnabled ? '1.375rem' : '0.125rem' }}
-              />
+              {volume > 0 ? (
+                <svg width="16" height="16" viewBox="0 0 10 10" style={{ imageRendering: 'pixelated' }} fill="#ffd700">
+                  <rect x="1" y="3" width="2" height="4"/>
+                  <rect x="3" y="2" width="1" height="6"/>
+                  <rect x="4" y="1" width="1" height="8"/>
+                  <rect x="6" y="3" width="1" height="1"/>
+                  <rect x="7" y="2" width="1" height="2"/>
+                  <rect x="6" y="5" width="1" height="1"/>
+                  <rect x="7" y="5" width="1" height="2"/>
+                  <rect x="8" y="1" width="1" height="1"/>
+                  <rect x="8" y="7" width="1" height="1"/>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 10 10" style={{ imageRendering: 'pixelated' }}>
+                  <rect x="1" y="3" width="2" height="4" fill="#555"/>
+                  <rect x="3" y="2" width="1" height="6" fill="#555"/>
+                  <rect x="4" y="1" width="1" height="8" fill="#555"/>
+                  <rect x="6" y="3" width="1" height="1" fill="#ff4444"/>
+                  <rect x="7" y="4" width="1" height="1" fill="#ff4444"/>
+                  <rect x="8" y="5" width="1" height="1" fill="#ff4444"/>
+                  <rect x="6" y="5" width="1" height="1" fill="#ff4444"/>
+                  <rect x="8" y="3" width="1" height="1" fill="#ff4444"/>
+                </svg>
+              )}
             </button>
           </div>
-          <p className="text-[9px] text-[#333] mt-1 tracking-wider">
-            {soundEnabled ? 'ON' : 'OFF'}
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => {
+              const v = parseFloat(e.target.value);
+              setVolume(v);
+              soundManager.setVolume(v);
+              soundManager.playPreview();
+            }}
+            className="w-full accent-[#ffd700] cursor-pointer"
+            aria-label="Volume"
+          />
+          <p
+            className="text-[9px] text-[#333] mt-1 tracking-wider cursor-pointer"
+            onClick={() => soundManager.playPreview()}
+          >
+            {volume === 0 ? 'MUTED' : `${Math.round(volume * 100)}%`}
           </p>
         </section>
 
