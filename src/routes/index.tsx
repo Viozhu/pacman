@@ -20,7 +20,10 @@ export default function HomePage() {
       {/* Title */}
       <h1
         className="text-4xl text-[#ffd700] tracking-widest mb-4 text-center"
-        style={{ animation: 'glow-pulse 2s ease-in-out infinite' }}
+        style={{
+          animation: 'glow-pulse 2s ease-in-out infinite',
+          textShadow: '0 0 8px #ffd700, 0 0 20px #ffd700, 0 0 40px #ffd700',
+        }}
       >
         PAC-MAN
       </h1>
@@ -44,7 +47,7 @@ export default function HomePage() {
       </p>
 
       {/* Menu */}
-      <nav className="flex flex-col gap-3 w-64">
+      <nav aria-label="Main menu" className="flex flex-col gap-3 w-64">
         <Link
           to="/game"
           className="text-black font-bold py-3 px-6 text-center text-[11px] tracking-widest transition-all hover:brightness-110"
