@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useSettingsStore } from '@/store/settingsStore';
 import { soundManager } from '@/engine/core/SoundManager';
@@ -6,6 +7,11 @@ const DIFFICULTIES = ['easy', 'normal', 'hard'] as const;
 
 export default function SettingsPage() {
   const { volume, difficulty, setVolume, mute, unmute, setDifficulty } = useSettingsStore();
+
+  useEffect(() => {
+    soundManager.init();
+    soundManager.setVolume(useSettingsStore.getState().volume);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black p-8">
