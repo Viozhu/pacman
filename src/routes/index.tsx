@@ -1,5 +1,17 @@
 import { Link } from '@tanstack/react-router';
 
+function PacManSVG() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Body: full circle minus mouth wedge, facing right */}
+      <path
+        d="M10,10 L20,4 A10,10 0 1,0 20,16 Z"
+        fill="#ffd700"
+      />
+    </svg>
+  );
+}
+
 function GhostSVG({ color }: { color: string }) {
   return (
     <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -59,7 +71,7 @@ export default function HomePage() {
 
       {/* Pac-Man row */}
       <div className="flex items-center justify-center gap-1.5 mb-6">
-        <GhostSVG color="#ff0000" />
+        <PacManSVG />
         {Array.from({ length: 5 }).map((_, i) => <DotSVG key={i} />)}
         <PowerPelletSVG />
         {Array.from({ length: 5 }).map((_, i) => <DotSVG key={i + 5} />)}
