@@ -65,12 +65,17 @@ export function useGameEngine(canvasRef: RefObject<HTMLCanvasElement | null>): v
       () => game.render(ctx),
     );
 
-    soundManager.startSiren();
+    // Delay siren until intro melody finishes (~3.9 s)
+    const sirenTimer = setTimeout(() => {
+      soundManager.startSiren();
+    }, 3900);
 
     return () => {
+      clearTimeout(sirenTimer);
       gameLoop.stop();
       inputManager.destroy();
       soundManager.stopSiren();
+      soundManager.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasRef]);

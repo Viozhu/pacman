@@ -79,6 +79,19 @@ class SoundManager {
     }
   }
 
+  destroy(): void {
+    this.stopSiren();
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
+    if (this.ctx) {
+      this.ctx.close().catch(() => undefined);
+      this.ctx = null;
+      this.masterGain = null;
+    }
+  }
+
   updateSirenSpeed(dotsRemaining: number, totalDots: number): void {
     if (!this.sirenOscillator || !this.ctx) return;
     const ratio = totalDots > 0 ? 1 - dotsRemaining / totalDots : 0;
