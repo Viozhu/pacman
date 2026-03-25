@@ -34,51 +34,72 @@ function GameOverOverlay({ score, level, status }: OverlayProps) {
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 gap-4">
-      <h2 className="text-3xl font-bold font-mono text-yellow-400 tracking-widest">
-        {status.type === 'victory' ? '🏆 YOU WIN!' : '💀 GAME OVER'}
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 gap-4">
+      <h2
+        className="text-2xl tracking-widest"
+        style={
+          status.type === 'victory'
+            ? { color: '#ffd700', animation: 'glow-pulse 1.5s infinite', textShadow: '0 0 8px #ffd700, 0 0 20px #ffd700' }
+            : { color: '#ff0000', textShadow: '0 0 8px #ff0000, 0 0 20px #ff0000' }
+        }
+      >
+        {status.type === 'victory' ? 'YOU WIN!' : 'GAME OVER'}
       </h2>
 
-      <p className="text-white font-mono text-lg tabular-nums">
+      <p
+        className="text-[#ffd700] text-xl tabular-nums"
+        style={{ textShadow: '0 0 8px #ffd700' }}
+      >
         {String(score).padStart(6, '0')}
       </p>
 
       {!isSaved ? (
-        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-2 w-48">
+        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3 w-48">
+          <p className="text-[10px] text-[#ffd700] [animation:var(--animate-blink)]">
+            ENTER YOUR INITIALS
+          </p>
           <input
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             maxLength={10}
             placeholder="YOUR NAME"
             disabled={isSaving}
-            className="w-full bg-black border border-gray-700 focus:border-yellow-400 text-white font-mono text-center py-2 px-3 rounded uppercase tracking-widest text-sm placeholder:normal-case placeholder:text-gray-600 focus:outline-none transition-colors"
+            className="w-full bg-black border-2 border-[#333] focus:border-[#ffd700] text-white text-center py-2 px-3 uppercase tracking-widest text-[10px] placeholder:text-[#333] placeholder:normal-case outline-none transition-colors"
           />
           <button
             type="submit"
             disabled={isSaving || !playerName.trim()}
-            className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:opacity-40 text-black font-bold font-mono py-2 rounded-lg transition-colors text-sm tracking-widest"
+            className="w-full text-black font-bold py-2 text-[10px] tracking-widest disabled:opacity-40 transition-all hover:brightness-110"
+            style={{
+              background: '#ffd700',
+              boxShadow: '0 0 12px #ffd700, 0 0 24px rgba(255,215,0,0.4)',
+            }}
           >
             {isSaving ? 'SAVING...' : 'SAVE SCORE'}
           </button>
         </form>
       ) : (
-        <p className="text-green-400 font-mono text-sm tracking-wider">✓ SCORE SAVED</p>
+        <p className="text-green-400 text-[10px] tracking-wider">✓ SCORE SAVED</p>
       )}
 
       <div className="flex gap-3 mt-1">
         {isSaved && (
           <Link
             to="/high-scores"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold font-mono py-2 px-4 rounded-lg transition-colors text-sm tracking-wider"
+            className="text-white text-[10px] py-2 px-4 tracking-wider transition-all hover:brightness-125"
+            style={{
+              background: '#0066cc',
+              boxShadow: '0 0 6px rgba(0,128,255,0.5)',
+            }}
           >
             LEADERBOARD
           </Link>
         )}
         <Link
           to="/"
-          className="border border-gray-700 hover:border-gray-400 text-gray-400 hover:text-white font-bold font-mono py-2 px-4 rounded-lg transition-colors text-sm tracking-wider"
+          className="border border-[#333] text-[#555] hover:border-[#555] hover:text-white py-2 px-4 text-[10px] tracking-wider transition-colors"
         >
-          MAIN MENU
+          ← MAIN MENU
         </Link>
       </div>
     </div>
