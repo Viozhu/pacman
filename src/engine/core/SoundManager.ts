@@ -14,6 +14,7 @@ class SoundManager {
   private sirenOscillator: OscillatorNode | null = null;
   private volume = 0.7;
   private chompToggle = false;
+  private lastPreviewTime = 0;
   private visibilityHandler: (() => void) | null = null;
 
   init(): void {
@@ -56,6 +57,29 @@ class SoundManager {
       case 'victory':       this.playVictory();       break;
       case 'gameOver':      this.playGameOver();      break;
     }
+  }
+
+  playPreview(): void {
+    if (!this.ctx || !this.masterGain) return;
+    const now = Date.now();
+    if (now - this.lastPreviewTime < 150) return;
+    this.lastPreviewTime = now;
+
+    const ctx = this.ctx;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.value = 440;
+    gain.gain.setValueAtTime(0.25, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.08);
   }
 
   startSiren(): void {
