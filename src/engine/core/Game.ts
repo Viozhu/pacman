@@ -163,11 +163,11 @@ export class Game {
       if (this.callbacks.getLevel() >= MAX_LEVELS) {
         soundManager.play('victory');
         this.callbacks.setStatus({ type: 'victory', finalScore: this.callbacks.getScore() });
-      } else {
-        soundManager.play('levelComplete');
-        this.callbacks.nextLevel();
-        this.advanceLevel();
+        return;
       }
+      soundManager.play('levelComplete');
+      this.callbacks.nextLevel();
+      this.advanceLevel();
     }
 
     soundManager.updateSirenSpeed(remaining, this.totalDots);
