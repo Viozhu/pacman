@@ -1,12 +1,13 @@
 import { createRouter, createRootRoute, createRoute } from '@tanstack/react-router';
 import { Outlet } from '@tanstack/react-router';
+import { CRTWrapper } from '@/components/ui/CRTWrapper';
 
 // Root Route
 const rootRoute = createRootRoute({
   component: () => (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+    <CRTWrapper>
       <Outlet />
-    </div>
+    </CRTWrapper>
   ),
 });
 

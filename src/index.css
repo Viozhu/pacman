@@ -105,5 +105,51 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Press Start 2P', monospace;
+    background: #000;
   }
+}
+
+@keyframes flicker {
+  0%, 89%  { opacity: 1; }
+  90%       { opacity: 0.94; }
+  91%       { opacity: 1; }
+  94%       { opacity: 0.97; }
+  95%, 100% { opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { text-shadow: 0 0 8px #ffd700, 0 0 20px #ffd700, 0 0 40px #ffd700; }
+  50%       { text-shadow: 0 0 4px #ffd700, 0 0 10px #ffd700, 0 0 20px #ffd700; }
+}
+
+.crt-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  animation: flicker 8s infinite;
+}
+
+.crt-wrapper::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 2px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.crt-wrapper::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.7) 100%);
+  pointer-events: none;
+  z-index: 9999;
 }
