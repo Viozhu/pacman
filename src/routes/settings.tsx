@@ -41,7 +41,30 @@ export default function SettingsPage() {
               aria-label={volume > 0 ? 'Mute sound' : 'Unmute sound'}
               className="text-[#555] hover:text-white transition-colors text-[14px] leading-none"
             >
-              {volume > 0 ? '🔊' : '🔇'}
+              {volume > 0 ? (
+                <svg width="16" height="16" viewBox="0 0 10 10" style={{ imageRendering: 'pixelated' }} fill="#ffd700">
+                  <rect x="1" y="3" width="2" height="4"/>
+                  <rect x="3" y="2" width="1" height="6"/>
+                  <rect x="4" y="1" width="1" height="8"/>
+                  <rect x="6" y="3" width="1" height="1"/>
+                  <rect x="7" y="2" width="1" height="2"/>
+                  <rect x="6" y="5" width="1" height="1"/>
+                  <rect x="7" y="5" width="1" height="2"/>
+                  <rect x="8" y="1" width="1" height="1"/>
+                  <rect x="8" y="7" width="1" height="1"/>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 10 10" style={{ imageRendering: 'pixelated' }}>
+                  <rect x="1" y="3" width="2" height="4" fill="#555"/>
+                  <rect x="3" y="2" width="1" height="6" fill="#555"/>
+                  <rect x="4" y="1" width="1" height="8" fill="#555"/>
+                  <rect x="6" y="3" width="1" height="1" fill="#ff4444"/>
+                  <rect x="7" y="4" width="1" height="1" fill="#ff4444"/>
+                  <rect x="8" y="5" width="1" height="1" fill="#ff4444"/>
+                  <rect x="6" y="5" width="1" height="1" fill="#ff4444"/>
+                  <rect x="8" y="3" width="1" height="1" fill="#ff4444"/>
+                </svg>
+              )}
             </button>
           </div>
           <input
@@ -54,6 +77,7 @@ export default function SettingsPage() {
               const v = parseFloat(e.target.value);
               setVolume(v);
               soundManager.setVolume(v);
+              soundManager.playPreview();
             }}
             className="w-full accent-[#ffd700] cursor-pointer"
             aria-label="Volume"
