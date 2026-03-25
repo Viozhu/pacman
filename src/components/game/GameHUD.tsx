@@ -9,23 +9,32 @@ export function GameHUD() {
   const isPaused = useUiStore((s) => s.isPaused);
 
   return (
-    <div className="flex items-center justify-between w-full max-w-[448px] px-2 py-2 text-white font-mono">
-      <span className="text-yellow-400 font-bold text-lg">
-        {String(score).padStart(6, '0')}
-      </span>
-
-      <div className="flex items-center gap-3 text-sm">
-        <span className="text-gray-400">LV {level}</span>
-        <span className="text-yellow-400">
-          {'●'.repeat(Math.max(0, lives))}
+    <div className="flex items-center justify-between w-full max-w-[448px] px-2 py-2">
+      {/* Score */}
+      <div className="flex flex-col">
+        <span className="text-[#ff0000] text-[9px] tracking-widest mb-1">1UP</span>
+        <span className="text-white tabular-nums text-[11px]">
+          {String(score).padStart(6, '0')}
         </span>
       </div>
 
+      {/* Level */}
+      <div className="flex flex-col items-center">
+        <span className="text-[#ff0000] text-[9px] tracking-widest mb-1">LEVEL</span>
+        <span className="text-white text-[11px]">{String(level).padStart(2, '0')}</span>
+      </div>
+
+      {/* Lives */}
+      <span className="text-[#ffd700] text-xl tracking-[6px]">
+        {'●'.repeat(Math.max(0, lives))}
+      </span>
+
+      {/* Pause button */}
       <button
         onClick={togglePause}
-        className="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded border border-gray-700 hover:border-gray-500"
+        className="text-[9px] text-[#555] border border-[#333] px-2 py-1 hover:text-white hover:border-[#555] transition-colors"
       >
-        {isPaused ? '▶ resume' : '⏸ pause'}
+        {isPaused ? '▶ RESUME' : '⏸ PAUSE'}
       </button>
     </div>
   );
