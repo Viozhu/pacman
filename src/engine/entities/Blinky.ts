@@ -45,7 +45,7 @@ export class Blinky extends Ghost {
   setBaseSpeed(speed: number): void {
     super.setBaseSpeed(speed);
     const phase = this.elroyPhase;
-    if (phase > 0 && this.mode !== GhostMode.FRIGHTENED && this.mode !== GhostMode.DEAD) {
+    if (phase !== 0 && this.mode !== GhostMode.FRIGHTENED && this.mode !== GhostMode.DEAD) {
       this.speed = speed * ELROY_SPEED_BOOST[phase];
     }
   }
