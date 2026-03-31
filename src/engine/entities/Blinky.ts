@@ -44,8 +44,9 @@ export class Blinky extends Ghost {
   // Override so speed boost survives mode changes back from FRIGHTENED
   setBaseSpeed(speed: number): void {
     super.setBaseSpeed(speed);
-    if (this.elroyPhase > 0 && this.mode !== GhostMode.FRIGHTENED && this.mode !== GhostMode.DEAD) {
-      this.speed = speed * ELROY_SPEED_BOOST[this.elroyPhase];
+    const phase = this.elroyPhase;
+    if (phase > 0 && this.mode !== GhostMode.FRIGHTENED && this.mode !== GhostMode.DEAD) {
+      this.speed = speed * ELROY_SPEED_BOOST[phase];
     }
   }
 
